@@ -2,6 +2,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <mutex>
 
 #define MAX_LEVEL 8
 #define INDEX_PROBABILITY 0.5
@@ -10,7 +11,7 @@ namespace Util
 {
 
 template<typename K, typename V> 
-class Node 
+class Node
 {
 public:
     Node() = default;
@@ -81,6 +82,8 @@ private:
     // pointer to sentinel node
     Node<K, V>* header;
 
+    std::mutex mtx;
+
     Comp comp;
 };
 
@@ -140,6 +143,8 @@ void SkipList<K, V, Comp>::insertElement(const K& key, const V& value)
 {
     std::cout << "Inserting key: " << key << std::endl;
 
+    mtx.lock();
+
     Node<K, V>* current = header;
     std::vector<Node<K, V>*> update(currentHighestLevel + 1, nullptr);
 
@@ -157,6 +162,7 @@ void SkipList<K, V, Comp>::insertElement(const K& key, const V& value)
 
     if (current && current->getKey() == key)
     {
+        mtx.unlock();
         std::cout << "key: " << key << " already exists." << std::endl;
         return;
     }
@@ -179,6 +185,7 @@ void SkipList<K, V, Comp>::insertElement(const K& key, const V& value)
     }
 
     currentNodeCount++;
+    mtx.unlock();
 }
 
 template<typename K, typename V, typename Comp>
@@ -186,6 +193,7 @@ void SkipList<K, V, Comp>::deleteElement(const K& key)
 {
     std::cout << "Deleting key: " << key << std::endl;
 
+    mtx.lock();
     Node<K, V>* current = header;
     std::vector<Node<K, V>*> update(currentHighestLevel + 1, nullptr);
 
@@ -204,6 +212,8 @@ void SkipList<K, V, Comp>::deleteElement(const K& key)
     if (!current || current->getKey() != key)
     {
         std::cout << "key: " << key << " doesn't exists." << std::endl;
+
+        mtx.unlock();
         return;
     }
 
@@ -222,6 +232,7 @@ void SkipList<K, V, Comp>::deleteElement(const K& key)
 
     currentNodeCount--;
 
+    mtx.unlock();
 }
 
 template<typename K, typename V, typename Comp>
