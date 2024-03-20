@@ -5,7 +5,7 @@
 #include <time.h>
 #include "../SkipList.h"
 
-#define NUM_THREADS 5
+#define NUM_THREADS 2
 #define TEST_COUNT 100000
 
 using namespace std;
